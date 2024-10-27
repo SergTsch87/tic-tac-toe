@@ -133,8 +133,32 @@ class Game:
 
 
 def main():
-    game = Game()
-    game.run()
+    # game = Game()
+    # game.run()
+
+    # board = Board()
+    # print(f'board == {board.board}')
+    list_lines = [[1, 0, 1], [1, 0, 0], [1, 0, 1]]
+    flat_list_lines = [elem for sublist in list_lines for elem in sublist]
+    print(f'flat_list_lines == {flat_list_lines}')
+    list_indexes = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+    # len_list_indexes = len(list_indexes)
+    new_list = []
+    # tmp_list = []
+    for indexes in list_indexes:
+        # tmp_list.append([flat_list_lines[list_indexes[i][0]], flat_list_lines[list_indexes[i][1]], flat_list_lines[list_indexes[i][2]]])
+        print(f'indexes == {indexes}')
+        print(f'indexes[0] == {indexes[0]}')
+        new_list = [flat_list_lines[indexes[0] - 1], flat_list_lines[indexes[1] - 1], flat_list_lines[indexes[2] - 1]]
+        print(f'new_list == {new_list}')
+        result_winner = list(map(all, new_list))
+        if result_winner:
+            print(f'result_winner == {result_winner}')
+            print(f'new_list == {new_list}')
+            return new_list
+        new_list = []
+    # result_winner = list(map(all, flat_list_lines))
+    # print(f'result_winner == {result_winner}')
 
 
 if __name__ == "__main__":
