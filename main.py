@@ -1,109 +1,140 @@
 #!usr/bin/env
-import pygame
+import pygame, sys
+
+import pygame.draw_py
 
 
-# відповідає за основну логіку гри
-class Game:
-    def __init__(self, currrent_state, action_gamer, count_steps, game_state) -> None:
-        self.currrent_state = currrent_state
-        self.action_gamer = action_gamer
-        self.count_steps = count_steps
-        self.game_state = game_state
-                            # : win, steps, draw
+SCREEN_WIDTH, SCREEN_HIGHT = 600, 600
+LINE_WIDTH = 15
+CELL_SIZE = 200
+BOARD_SIZE = 3
 
-    def init_game():
-        pass
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
-    def change_move():
-        pass
-
-    def check_win():
-        pass
-
-    def restart_game():
-        pass
-
-
-    # Чергування за допомогою булевої змінної
-    def switch_turn(current_turn):
-        return not current_turn
+pygame.init()
 
 
 # представляє ігрове поле
 class Board:
-    def __init__(self, size_board, state_cells) -> None:
-        self.size_board = size_board
-        self.state_cells = state_cells
+    def __init__(self, size = BOARD_SIZE) -> None:
+        self.size = size
+        self.board = [["" for _ in range(size)] for _ in range(size)]
 
-    def show_board():
-        pass
+    def reset(self):
+        self.board = [["" for _ in range(self.size)] for _ in range(self.size)]
 
-    def update_state_cells():
-        pass
+    # Малює сітку та символи на полі
+    def draw(self, screen):
+        for row in range(1, self.size):
+            pygame.draw.line(screen, BLACK, (0, row * CELL_SIZE), (SCREEN_WIDTH, row * CELL_SIZE), LINE_WIDTH)
+            pygame.draw.line(screen, BLACK, (row * CELL_SIZE, 0), (row * CELL_SIZE, SCREEN_HIGHT), LINE_WIDTH)
 
-    def check_available_steps():
-        pass    
+        for row in range(self.size):
+            for col in range(self.size):
+                if self.board[row][col] == "X":
+                    pygame.draw.line(screen, RED, (col * CELL_SIZE + 20, row * CELL_SIZE + 20), 
+                                                  ((col + 1) * CELL_SIZE - 20, (row + 1) * CELL_SIZE - 20), LINE_WIDTH)
+                    
+                    pygame.draw.line(screen, RED, (col * CELL_SIZE + 20, (row + 1) * CELL_SIZE - 20),
+                                                  ((col + 1) * CELL_SIZE - 20, row * CELL_SIZE + 20), LINE_WIDTH)
+                elif self.board[row][col] == "0":
+                    pygame.draw.circle(screen, BLUE, (col * CELL_SIZE + CELL_SIZE // 2, row * CELL_SIZE + CELL_SIZE // 2), (CELL_SIZE // 2 - 20), LINE_WIDTH)
+    
+
+    # Вставити символ у порожню чарунку
+    def update(self, row, col, player_symbol):
+        if self.board[row][col] == "":
+            self.board[row][col] = player_symbol
+            return True
+        
+        return False
+    
+
+    def check_win(self, player_symbol):
+        # Перевірка по стовпцях, рядках та діагоналях
+        for row in range(self.size):
+            if all(self.board[row][col] == player_symbol for col in range(self.size)):
+                return True
+            
+        for col in range(self.size):
+            if all(self.board[row][col] == player_symbol for row in range(self.size)):
+                return True
+
+        if all(self.board[i][i] == player_symbol for i in range(self.size)) or all(self.board[i][self.size - i - 1] == player_symbol for i in range(self.size)):
+            return True
+        
+        return False
+    
+
+    def is_full(self):
+        return all(self.board[row][col] != "" for row in range(self.size) for col in range(self.size))
 
 
 # для гравця (наприклад, людина або комп’ютер)
 class Player:
-    def __init__(self, symbol_gamer, name_gamer, type_gamer) -> None:
-        self.symbol_gamer = symbol_gamer
-        self.name_gamer = name_gamer
-        self.type_gamer = type_gamer # people or pc
-
-    def detect_to_next_step():
-        pass
+    def __init__(self, symbol) -> None:
+        self.symbol = symbol
 
 
-# для зберігання ходів
-class Move:
-    def __init__(self, coords_step, symbol_gamer) -> None:
-        self.coords_step = coords_step
-        self.symbol_gamer = symbol_gamer
-
-
-# для управління грою, валідації ходів та відстеження статусу гри
-class GameController:
+# відповідає за основну логіку гри
+class Game:
     def __init__(self) -> None:
-        pass
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HIGHT))
+        pygame.display.set_caption("Tic Tac Toe")
+        self.board = Board()
+        self.players = [Player("X"), Player("0")]
+        self.currrent_player_index = 0
+        self.game_over = False
+        self.winner = None
 
-    def process_input():
-        pass
-    
-    def call_check_game():
-        pass
-    
-    def control_stream_game():
-        pass
-    
+    def reset(self):
+        self.board.reset()
+        self.currrent_player_index = 0
+        self.game_over = False
+        self.winner = None
+
+    def switch_player(self): # 0 or 1  >>>  "X" or "0"
+        self.currrent_player_index = 1 - self.currrent_player_index
+
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                
+                if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
+                    mouse_x, mouse_y = event.pos
+                    clicked_row = mouse_y // CELL_SIZE
+                    clicked_col = mouse_x // CELL_SIZE
+
+                    if self.board.update(clicked_row, clicked_col, self.players[self.currrent_player_index].symbol):
+                        if self.board.check_win(self.players[self.currrent_player_index].symbol):
+                            self.game_over = True
+                            self.winner = self.players[self.currrent_player_index].symbol
+                            print(f'winner == {self.winner}')
+                        elif self.board.is_full():
+                            self.game_over = True
+                            self.winner = "Draw"
+                            print(f'winner == "Draw"')
+                        else:
+                            self.switch_player()
+                            print('else: switch_player()')
+
+            self.screen.fill(WHITE)
+            self.board.draw(self.screen)
+            pygame.display.flip()
+
+        pygame.quit()
+        sys.exit()
 
 
 def main():
-    player_1 = Player() # symbol == X
-    player_2 = Player() # symbol == O
-    board = Board()
-
-    running = True
-    while running:
-        pass
-        # check onclick or keydown
-        # check available to select cell
-        # if available cell:
-        #     update_board
-        #     change action player
-        # check win or draw
-        # update screen
-
-        # show raiting
-        # restart game or game over
-
-        current_turn = True # True - гравець "X",  False - гравець "O"
-        current_turn = switch_turn(current_turn)
-        if current_turn:
-            print("Хід гравця X")
-        else:
-            print("Хід гравця O")
+    game = Game()
+    game.run()
 
 
 if __name__ == "__main__":
