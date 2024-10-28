@@ -3,6 +3,8 @@ import pygame, sys
 
 import pygame.draw_py
 
+# env1\bin\python -m pip freeze > requirements.txt
+# env2\bin\python -m pip install -r requirements.txt
 
 SCREEN_WIDTH, SCREEN_HIGHT = 600, 600
 LINE_WIDTH = 15
@@ -13,6 +15,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
+HOWER_COLOR = (150, 150, 150)
 
 pygame.init()
 
@@ -101,22 +104,41 @@ class Game:
 
     def run(self):
         running = True
+        count_step = 0
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 
+                # mouse_pos = pygame.mouse.get_pos()
+                # for row in range(BOARD_SIZE):
+                #     for col in range(BOARD_SIZE):
+                #         rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+
+                #         if rect.collidepoint(mouse_pos):
+                #             pygame.draw.rect(self.screen, HOWER_COLOR, rect)
+                #         # else:
+                #         #     pygame.draw.rect(self.screen, HOWER_COLOR, rect)
+                    
+                # if event.type == pygame.MOUSEMOTION and not self.game_over:
+                #     mouse_x, mouse_y = event.pos
+                #     # Треба замалювати той квадрат, над яким проходить курсор
+                #     moved_row = mouse_y // CELL_SIZE
+                #     moved_col = mouse_x // CELL_SIZE
+
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
                     mouse_x, mouse_y = event.pos
                     clicked_row = mouse_y // CELL_SIZE
                     clicked_col = mouse_x // CELL_SIZE
 
                     if self.board.update(clicked_row, clicked_col, self.players[self.currrent_player_index].symbol):
-                        if self.board.check_win(self.players[self.currrent_player_index].symbol):
+                        count_step += 1
+                        print(f'count_step == {count_step}')
+                        if count_step > 4 and self.board.check_win(self.players[self.currrent_player_index].symbol):
                             self.game_over = True
                             self.winner = self.players[self.currrent_player_index].symbol
                             print(f'winner == {self.winner}')
-                        elif self.board.is_full():
+                        elif count_step == 9 and self.board.is_full():
                             self.game_over = True
                             self.winner = "Draw"
                             print(f'winner == "Draw"')
@@ -133,33 +155,36 @@ class Game:
 
 
 def main():
-    # game = Game()
-    # game.run()
+    game = Game()
+    game.run()
 
-    # board = Board()
-    # print(f'board == {board.board}')
-    list_lines = [[1, 0, 1], [1, 0, 0], [1, 0, 1]]
-    flat_list_lines = [elem for sublist in list_lines for elem in sublist]
-    print(f'flat_list_lines == {flat_list_lines}')
-    list_indexes = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
-    # len_list_indexes = len(list_indexes)
-    new_list = []
-    # tmp_list = []
-    for indexes in list_indexes:
-        # tmp_list.append([flat_list_lines[list_indexes[i][0]], flat_list_lines[list_indexes[i][1]], flat_list_lines[list_indexes[i][2]]])
-        print(f'indexes == {indexes}')
-        print(f'indexes[0] == {indexes[0]}')
-        new_list = [flat_list_lines[indexes[0] - 1], flat_list_lines[indexes[1] - 1], flat_list_lines[indexes[2] - 1]]
-        print(f'new_list == {new_list}')
-        result_winner = list(map(all, new_list))
-        if result_winner:
-            print(f'result_winner == {result_winner}')
-            print(f'new_list == {new_list}')
-            return new_list
-        new_list = []
-    # result_winner = list(map(all, flat_list_lines))
-    # print(f'result_winner == {result_winner}')
+    # # # tmp_list = ['', 0, 1]
+    # # # tmp_list = [0, 0, 1]
+    # # tmp_list = [1, 0, 1]
+    # # print(f'all(tmp_list) == {all(tmp_list)}')
 
+    # list_lines = [[1, 0, 1], [1, 0, 0], [1, 0, 1]]
+    # flat_list_lines = [elem for sublist in list_lines for elem in sublist]
+    # list_indexes = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+    # copy_list_indexes = list_indexes
+    # for indexes in list_indexes:
+    #     # print(f'indexes == {indexes}')
+    #     # print(f'indexes[0] == {indexes[0]}')
+        
+    #     # new_list - це трійка елементів з flat_list_lines,
+    #     # індекси яких відповідають елементам відповідного списку трійки з list_indexes
+    #     new_list = [flat_list_lines[i - 1] for i in indexes]
+    #     print(f'indexes: new_list == {new_list}, {indexes}')
+    #     print(f'list_indexes == {list_indexes}')
+    #     if (len(new_list) == 2 or len(new_list) == 3) and all(new_list) == False:
+    #         copy_list_indexes.remove(indexes)
+    #     elif all(new_list):
+    #         print(f'new_list == {new_list}')
+    #         print(f'We have a winner == {indexes}')
+    #         break
+
+    # print(f'copy_list_indexes == {copy_list_indexes}')
+        
 
 if __name__ == "__main__":
     main()
