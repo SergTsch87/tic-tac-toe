@@ -16,6 +16,7 @@ BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 HOWER_COLOR = (150, 150, 150)
+BASE_COLOR = WHITE
 
 pygame.init()
 
@@ -106,26 +107,23 @@ class Game:
         running = True
         count_step = 0
         while running:
+            self.board.draw(self.screen)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 
-                # mouse_pos = pygame.mouse.get_pos()
-                # for row in range(BOARD_SIZE):
-                #     for col in range(BOARD_SIZE):
-                #         rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                mouse_pos = pygame.mouse.get_pos()
+                # Очищення екрану
+                self.screen.fill(WHITE)
+                for row in range(BOARD_SIZE):
+                    for col in range(BOARD_SIZE):
+                        rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
 
-                #         if rect.collidepoint(mouse_pos):
-                #             pygame.draw.rect(self.screen, HOWER_COLOR, rect)
-                #         # else:
-                #         #     pygame.draw.rect(self.screen, HOWER_COLOR, rect)
+                        if rect.collidepoint(mouse_pos):
+                            pygame.draw.rect(self.screen, HOWER_COLOR, rect)
+                        else:
+                            pygame.draw.rect(self.screen, BASE_COLOR, rect)
                     
-                # if event.type == pygame.MOUSEMOTION and not self.game_over:
-                #     mouse_x, mouse_y = event.pos
-                #     # Треба замалювати той квадрат, над яким проходить курсор
-                #     moved_row = mouse_y // CELL_SIZE
-                #     moved_col = mouse_x // CELL_SIZE
-
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.game_over:
                     mouse_x, mouse_y = event.pos
                     clicked_row = mouse_y // CELL_SIZE
@@ -146,8 +144,9 @@ class Game:
                             self.switch_player()
                             print('else: switch_player()')
 
-            self.screen.fill(WHITE)
+            # Малювання дошки поверх усього екрану
             self.board.draw(self.screen)
+            # Оновлення дисплею
             pygame.display.flip()
 
         pygame.quit()
