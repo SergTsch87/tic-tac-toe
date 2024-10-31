@@ -31,11 +31,9 @@ class Board:
     def reset(self):
         self.board = [["" for _ in range(self.size)] for _ in range(self.size)]
 
-    # def draw_winning_line(self, self.board.check_win(self.players[self.currrent_player_index].symbol)[1]):
     def draw_winning_line(self, dict_winning_coords, screen):
         # if self.winning_line_drawn:
         #     return # Якщо лінію вже намальовано, тоді виходимо (щоб не було перемальовок лінії)
-        # print(f'dict_winning_coords == {dict_winning_coords}')
         num_col = dict_winning_coords['col']
         num_row = dict_winning_coords['row']
         
@@ -47,16 +45,6 @@ class Board:
                                           (self.size * CELL_SIZE - 10, num_row * CELL_SIZE + 100), LINE_WIDTH)
             
         # self.winning_line_drawn = True # Встановлюємо прапорець, щоб лінію не перемальовувати
-
-        
-        # if num_col >= 0: # vert            
-        #     pygame.draw.line(screen, BLACK, (num_col * CELL_SIZE + 10, row * CELL_SIZE + 10), 
-        #                                   (num_col * CELL_SIZE + 10, (row + 1) * CELL_SIZE - 10), LINE_WIDTH)
-        # elif num_row >= 0: # horz
-        #     pygame.draw.line(screen, BLACK, (col * CELL_SIZE + 10, num_row * CELL_SIZE + 10), 
-        #                                   ((col + 1) * CELL_SIZE - 10, num_row * CELL_SIZE + 10), LINE_WIDTH)
-
-
 
     def draw_x(self, screen, col, row):
         pygame.draw.line(screen, RED, (col * CELL_SIZE + 40, row * CELL_SIZE + 20), 
@@ -89,10 +77,6 @@ class Board:
 
         self.draw_winning_line(dict_winning_coords, screen)
 
-        # if count_step > 4 and has_winner:
-        #     self.draw_winning_line(dict_winning_coords, screen)
-        # self.draw_winning_line(self, screen)
-
     # Вставити символ у порожню чарунку
     def update(self, row, col, player_symbol):
         if self.board[row][col] == "":
@@ -103,7 +87,6 @@ class Board:
     
 
     def check_win(self, player_symbol, dict_winning_coords):
-        # dict_winning_coords = {'row': -1, 'col': -1}
         # Перевірка по рядках, стовпцях та діагоналях
         for row in range(self.size):
             if all(self.board[row][col] == player_symbol for col in range(self.size)):
@@ -124,6 +107,7 @@ class Board:
         return False, dict_winning_coords
     
 
+    # Перевіряє, чи заповнено матрицю (список списків) поля
     def is_full(self):
         return all(self.board[row][col] != "" for row in range(self.size) for col in range(self.size))
 
@@ -164,14 +148,8 @@ class Game:
             has_winner, dict_winning_coords = self.board.check_win(self.players[self.currrent_player_index].symbol, dict_winning_coords)
 
             if count_step > 4 and has_winner:
-            # if count_step > 4 and self.board.check_win(self.players[self.currrent_player_index].symbol)[0]:
                 self.game_over = True
                 self.winner = self.players[self.currrent_player_index].symbol
-                
-                # !!! Перевір!
-                # self.board.draw_winning_line(self.board.check_win(self.players[self.currrent_player_index].symbol)[1], self.screen, dict_winning_coords)
-                # self.board.draw_winning_line(dict_winning_coords, self.screen)
-                print('Intro process_turn function')
                 print(f'winner == {self.winner}')
             elif count_step == 9 and self.board.is_full():
                 self.game_over = True
@@ -195,7 +173,6 @@ class Game:
                 rect = pygame.Rect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 self.change_color(rect, mouse_pos)
 
-    # def run(self, dict_winning_coords):
     def run(self):
         running = True
         count_step = 0
@@ -232,8 +209,7 @@ class Game:
 def main():
     game = Game()
     game.run()
-    # game.run(dict_winning_coords)
-
+    
     # # # tmp_list = ['', 0, 1]
     # # # tmp_list = [0, 0, 1]
     # # tmp_list = [1, 0, 1]
