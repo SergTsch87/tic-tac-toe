@@ -36,6 +36,8 @@ class Board:
         #     return # Якщо лінію вже намальовано, тоді виходимо (щоб не було перемальовок лінії)
         num_col = dict_winning_coords['col']
         num_row = dict_winning_coords['row']
+        # print(f'num_col == {num_col}')
+        # print(f'num_row == {num_row}')
         
         if num_col >= 0: # vert            
             pygame.draw.line(screen, BLACK, (num_col * CELL_SIZE + 100, 10), 
@@ -43,6 +45,16 @@ class Board:
         elif num_row >= 0: # horz
             pygame.draw.line(screen, BLACK, (10, num_row * CELL_SIZE + 100), 
                                           (self.size * CELL_SIZE - 10, num_row * CELL_SIZE + 100), LINE_WIDTH)
+            
+        # elif num_row == -1 and num_col == 3: # head diag
+        elif num_row == -3 and num_col == -3: # head diag
+            pygame.draw.line(screen, BLACK, (10, 10), 
+                                          (self.size * CELL_SIZE - 10, self.size * CELL_SIZE - 10), LINE_WIDTH)
+        
+        # elif num_row == 3 and num_col == -1: # scnd diag
+        elif num_row == -2 and num_col == -2: # scnd diag
+            pygame.draw.line(screen, BLACK, (self.size * CELL_SIZE - 10, 10), 
+                                          (10, self.size * CELL_SIZE - 10), LINE_WIDTH)
             
         # self.winning_line_drawn = True # Встановлюємо прапорець, щоб лінію не перемальовувати
 
@@ -99,10 +111,16 @@ class Board:
                 return True, dict_winning_coords
 
         if all(self.board[i][i] == player_symbol for i in range(self.size)):
-            return True, {'row': -1, 'col': 3}
+            # dict_winning_coords = {'row': -1, 'col': 3}
+            dict_winning_coords = {'row': -3, 'col': -3}
+            return True, dict_winning_coords
+            # return True, {'row': -1, 'col': 3}
         
         elif all(self.board[i][self.size - i - 1] == player_symbol for i in range(self.size)):
-            return True, {'row': 3, 'col': -1}
+            dict_winning_coords = {'row': -2, 'col': -2}
+            # dict_winning_coords = {'row': 3, 'col': -1}
+            return True, dict_winning_coords
+            # return True, {'row': 3, 'col': -1}
         
         return False, dict_winning_coords
     
@@ -142,10 +160,11 @@ class Game:
     def process_turn(self, clicked_row, clicked_col, count_step, dict_winning_coords):
         if self.board.update(clicked_row, clicked_col, self.players[self.currrent_player_index].symbol):
             count_step += 1
-            print(f'count_step == {count_step}')
+            # print(f'count_step == {count_step}')
 
             # Оновлення словника dict_winning_coords
             has_winner, dict_winning_coords = self.board.check_win(self.players[self.currrent_player_index].symbol, dict_winning_coords)
+            # print(f'\nIntro process_turn: dict_winning_coords == {dict_winning_coords}\n')
 
             if count_step > 4 and has_winner:
                 self.game_over = True
@@ -179,7 +198,7 @@ class Game:
         dict_winning_coords = {'row': -1, 'col': -1}
 
         while running:
-            self.board.draw(self.screen, dict_winning_coords)
+            # self.board.draw(self.screen, dict_winning_coords)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -207,35 +226,112 @@ class Game:
 
 
 def main():
-    game = Game()
-    game.run()
+    # game = Game()
+    # game.run()
     
     # # # tmp_list = ['', 0, 1]
     # # # tmp_list = [0, 0, 1]
     # # tmp_list = [1, 0, 1]
     # # print(f'all(tmp_list) == {all(tmp_list)}')
 
-    # list_lines = [[1, 0, 1], [1, 0, 0], [1, 0, 1]]
-    # flat_list_lines = [elem for sublist in list_lines for elem in sublist]
-    # list_indexes = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
-    # copy_list_indexes = list_indexes
-    # for indexes in list_indexes:
-    #     # print(f'indexes == {indexes}')
-    #     # print(f'indexes[0] == {indexes[0]}')
-        
-    #     # new_list - це трійка елементів з flat_list_lines,
-    #     # індекси яких відповідають елементам відповідного списку трійки з list_indexes
-    #     new_list = [flat_list_lines[i - 1] for i in indexes]
-    #     print(f'indexes: new_list == {new_list}, {indexes}')
-    #     print(f'list_indexes == {list_indexes}')
-    #     if (len(new_list) == 2 or len(new_list) == 3) and all(new_list) == False:
-    #         copy_list_indexes.remove(indexes)
-    #     elif all(new_list):
-    #         print(f'new_list == {new_list}')
-    #         print(f'We have a winner == {indexes}')
-    #         break
+    list_lines = [[0, 1, 0], [1, 0, -1], [1, 1, 0]]
+    # list_lines = [[1, 0, 0], [1, 1, 0], [0, 0, 1]]
+    flat_list_lines = [elem for sublist in list_lines for elem in sublist] # 511 можливих комбінацій
+    
+    list_winner_indexes = [[1,2,3], [4,5,6], [7,8,9], [1,4,7], [2,5,8], [3,6,9], [1,5,9], [3,5,7]]
+    # Чи мо, краще створити такий список?:
+        # list_winner_indexes = ['123', '456', '789', '147', '258', '369', '159', '357']
 
-    # print(f'copy_list_indexes == {copy_list_indexes}')
+    len_flat_list_lines = len(flat_list_lines)
+    # list_indexes_x = []
+    # list_indexes_0 = []
+    
+    # Оптимізуй це!
+    # Збираємо списки індексів іксів та нулів відповідно
+    list_indexes_x = [x[0] + 1 for x in enumerate(flat_list_lines) if x[1]]
+    print(f'list_indexes_x == {list_indexes_x}') # [1, 4, 5, 9]
+
+    list_indexes_0 = [y[0] + 1 for y in enumerate(flat_list_lines) if y[1] == 0]
+    print(f'list_indexes_0 == {list_indexes_0}') # [2, 3, 6, 7, 8]
+
+    set_indexes_x = set(list_indexes_x)
+    set_indexes_0 = set(list_indexes_0)
+
+    list_0 = [item for item in list_winner_indexes if set(item).isdisjoint(set_indexes_x)]
+    print(f'list_0 == {list_0}') # []
+
+    list_x = [item for item in list_winner_indexes if set(item).isdisjoint(set_indexes_0)]
+    print(f'list_x == {list_x}') # []
+
+    if len(list_0) > 0:
+        print('Player_0 this is winner!)')
+    elif len(list_x) > 0:
+        print('Player_x this is winner!)')
+    else:
+        print('Draw!')
+
+    # list_indexes_0 = [set_indexes_x and set(item) for item in list_winner_indexes]
+    # print(f'list_indexes_0 == {list_indexes_0}') # [{1}, {4, 5}, {9}, {1, 4}, {5}, {9}, {1, 5, 9}, {5}]
+    
+    # list_indexes_0 = [set_indexes_x & set(item) for item in list_winner_indexes]
+    # print(f'list_indexes_0 == {list_indexes_0}') # [{1}, {4, 5}, {9}, {1, 4}, {5}, {9}, {1, 5, 9}, {5}]
+
+        # list_indexes_x = [x[0] for x in enumerate(flat_list_lines) if x]
+        # print(f'list_indexes_x == {list_indexes_x}') # [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+        # list_indexes_x = [x for x in flat_list_lines if x]
+        # print(f'list_indexes_x == {list_indexes_x}') # [1, 1, 1, 1]
+
+        # list_indexes_x = list(enumerate(flat_list_lines))
+        
+        # print(f'list_indexes_x == {list_indexes_x}')
+        # print(f'list_indexes_x[3][0] == {list_indexes_x[3][0]}')
+        # print(f'list_indexes_x[3][1] == {list_indexes_x[3][1]}')
+        
+    # for item in range(len_flat_list_lines):
+    #     if item == '0':
+    #         list_indexes_0.append(item + 1)
+    #     elif item == 'x':
+    #         list_indexes_x.append(item + 1)
+
+    # Задача:
+    # Порівняти список довжиною 2..5 ел-тів, зі списком списків list_winner_indexes
+    # len_list_winner_indexes = len(list_winner_indexes)
+    # len_list_indexes_x = len(list_indexes_x)
+    
+    # for item in list_indexes_x:
+    #     for elem in list_winner_indexes:
+    #         if item in elem:
+    #             # вилучаємо трійку індексів, які є в elem
+    #             pass
+    
+    # Також, створимо список для "0", в якому залишимо тіко ті ел-ти списку list_winner_indexes, індексів яких немає у списку list_indexes_x.
+    # Тобто, наприклад:
+    #     list_indexes_x = [2,3,4,5]
+    # Тоді для нулів залишається тіко [7,8,9], бо усі інші ел-ти мають у своєму складі хоча б одне з чисел списку list_indexes_x.
+    # Такий спосіб повинен зменшити к-сть перевірок для list_indexes_0
+
+# 2-й спосіб:
+
+# # 1-й спосіб:
+#     copy_list_winner_indexes = list_winner_indexes
+#     for indexes in list_winner_indexes:
+#         # print(f'indexes == {indexes}')
+#         # print(f'indexes[0] == {indexes[0]}')
+        
+#         # new_list - це трійка елементів з flat_list_lines,
+#         # індекси яких відповідають елементам відповідного списку трійки з list_winner_indexes
+#         new_list = [flat_list_lines[i - 1] for i in indexes]
+#         print(f'indexes: new_list == {new_list}, {indexes}')
+#         print(f'list_winner_indexes == {list_winner_indexes}')
+#         if (len(new_list) == 2 or len(new_list) == 3) and all(new_list) == False:
+#             copy_list_winner_indexes.remove(indexes)
+#         elif all(new_list):
+#             print(f'new_list == {new_list}')
+#             print(f'We have a winner == {indexes}')
+#             break
+
+#     print(f'copy_list_winner_indexes == {copy_list_winner_indexes}')
         
 
 if __name__ == "__main__":
